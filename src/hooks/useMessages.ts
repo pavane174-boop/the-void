@@ -21,21 +21,26 @@ export function useMessages(room: Room | null) {
     destructTimers.current.set(msg.id, timer)
   }, [])
 
+  const fetchMessages = useCallback(async (roomId: string) => {
+    const { data } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: true })
+    return (data ?? []) as Message[]
+  }, [])
+
   useEffect(() => {
     if (!room) return
     setLoading(true)
 
-    supabase
-      .from('messages')
-      .select('*')
-      .eq('room_id', room.id)
-      .order('created_at', { ascending: true })
-      .then(({ data }) => {
-        const msgs = (data ?? []) as Message[]
-        setMessages(msgs)
-        msgs.forEach(scheduleSelfDestruct)
-        setLoading(false)
-      })
+    let realtimeWorking = false
+
+    fetchMessages(room.id).then(msgs => {
+      setMessages(msgs)
+      msgs.forEach(scheduleSelfDestruct)
+      setLoading(false)
+    })
 
     const channel = supabase
       .channel(`room-messages-${room.id}`)
@@ -43,8 +48,9 @@ export function useMessages(room: Room | null) {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${room.id}` },
         ({ new: msg }) => {
+          realtimeWorking = true
           const newMsg = msg as Message
-          setMessages(prev => [...prev, newMsg])
+          setMessages(prev => prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg])
           scheduleSelfDestruct(newMsg)
         }
       )
@@ -52,6 +58,7 @@ export function useMessages(room: Room | null) {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'messages', filter: `room_id=eq.${room.id}` },
         ({ new: msg }) => {
+          realtimeWorking = true
           setMessages(prev => prev.map(m => (m.id === msg.id ? (msg as Message) : m)))
         }
       )
@@ -59,6 +66,7 @@ export function useMessages(room: Room | null) {
         'postgres_changes',
         { event: 'DELETE', schema: 'public', table: 'messages', filter: `room_id=eq.${room.id}` },
         ({ old: msg }) => {
+          realtimeWorking = true
           setMessages(prev => prev.filter(m => m.id !== msg.id))
           const timer = destructTimers.current.get(msg.id)
           if (timer) {
@@ -69,12 +77,20 @@ export function useMessages(room: Room | null) {
       )
       .subscribe()
 
+    // Polling fallback — kicks in if realtime hasn't fired within 6 seconds
+    const pollInterval = setInterval(async () => {
+      if (realtimeWorking) return
+      const msgs = await fetchMessages(room.id)
+      setMessages(msgs)
+    }, 5000)
+
     return () => {
       supabase.removeChannel(channel)
+      clearInterval(pollInterval)
       destructTimers.current.forEach(t => clearTimeout(t))
       destructTimers.current.clear()
     }
-  }, [room, scheduleSelfDestruct])
+  }, [room, scheduleSelfDestruct, fetchMessages])
 
   const sendMessage = useCallback(
     async (params: {
