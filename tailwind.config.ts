@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
         grotesk: ['Space Grotesk', 'system-ui', 'sans-serif'],
         mono: ['Space Grotesk', 'monospace'],
       },

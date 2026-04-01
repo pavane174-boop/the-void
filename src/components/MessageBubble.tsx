@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import type { Message, ReactionType } from '../lib/types'
 import { REACTION_EMOJIS, REACTION_KEYS } from '../lib/types'
 import { timeAgo } from '../lib/utils'
@@ -10,7 +11,7 @@ import { ReplyBubble } from './ReplyBubble'
 
 interface MessageBubbleProps {
   message: Message
-  onTap: (msg: Message) => void
+  onLongPress: (msg: Message) => void
   onVote: (msg: Message, optionIndex: number) => void
   onAnswerBomb: (msg: Message, answer: string) => void
   onPin: (msg: Message) => void
@@ -19,50 +20,102 @@ interface MessageBubbleProps {
 
 export function MessageBubble({
   message,
-  onTap,
+  onLongPress,
   onVote,
   onAnswerBomb,
   onPin: _onPin,
   sessionId,
 }: MessageBubbleProps) {
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const didLongPress = useRef(false)
+
+  const startPress = () => {
+    didLongPress.current = false
+    pressTimer.current = setTimeout(() => {
+      didLongPress.current = true
+      onLongPress(message)
+    }, 500)
+  }
+
+  const cancelPress = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current)
+      pressTimer.current = null
+    }
+  }
+
+  const longPressProps = {
+    onTouchStart: startPress,
+    onTouchEnd: cancelPress,
+    onTouchMove: cancelPress,
+    onMouseDown: startPress,
+    onMouseUp: cancelPress,
+    onMouseLeave: cancelPress,
+    onContextMenu: (e: React.MouseEvent) => {
+      e.preventDefault()
+      onLongPress(message)
+    },
+    style: { userSelect: 'none' as const },
+  }
+
   const { message_type } = message
 
   if (message_type === 'confession') {
-    return <ConfessionBubble message={message} onClick={() => onTap(message)} />
+    return (
+      <div {...longPressProps}>
+        <ConfessionBubble message={message} onClick={() => {}} />
+      </div>
+    )
   }
 
   if (message_type === 'poll') {
     return (
-      <PollBubble
-        message={message}
-        onVote={i => onVote(message, i)}
-        sessionId={sessionId}
-        onClick={() => onTap(message)}
-      />
+      <div {...longPressProps}>
+        <PollBubble
+          message={message}
+          onVote={i => onVote(message, i)}
+          sessionId={sessionId}
+          onClick={() => {}}
+        />
+      </div>
     )
   }
 
   if (message_type === 'ticking_bomb') {
     return (
-      <TickingBombBubble
-        message={message}
-        onAnswer={a => onAnswerBomb(message, a)}
-        sessionId={sessionId}
-        onClick={() => onTap(message)}
-      />
+      <div {...longPressProps}>
+        <TickingBombBubble
+          message={message}
+          onAnswer={a => onAnswerBomb(message, a)}
+          sessionId={sessionId}
+          onClick={() => {}}
+        />
+      </div>
     )
   }
 
   if (message_type === 'self_destruct' || message.self_destruct_at) {
-    return <SelfDestructBubble message={message} onClick={() => onTap(message)} />
+    return (
+      <div {...longPressProps}>
+        <SelfDestructBubble message={message} onClick={() => {}} />
+      </div>
+    )
   }
 
   if (message.is_pinned) {
-    return <PinnedBubble message={message} onClick={() => onTap(message)} />
+    return (
+      <div {...longPressProps}>
+        <PinnedBubble message={message} onClick={() => {}} />
+      </div>
+    )
   }
 
   if (message.reply_to_id) {
-    return <ReplyBubble message={message} onClick={() => onTap(message)} />
+    return (
+      <div {...longPressProps}>
+        <ReplyBubble message={message} onClick={() => {}} />
+      </div>
+    )
   }
 
   // Regular message
@@ -75,13 +128,12 @@ export function MessageBubble({
 
   return (
     <div
-      className={`message-enter rounded-bubble p-3 mx-3 mb-2 cursor-pointer ${isFame ? 'fame-card' : ''}`}
-      style={
-        isFame
-          ? {}
-          : { backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }
-      }
-      onClick={() => onTap(message)}
+      {...longPressProps}
+      className={`message-enter rounded-bubble p-3 mx-3 mb-2 ${isFame ? 'fame-card' : ''}`}
+      style={{
+        ...(isFame ? {} : { backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }),
+        userSelect: 'none',
+      }}
     >
       {isFame && (
         <div className="flex items-center gap-1.5 mb-2">
@@ -95,8 +147,8 @@ export function MessageBubble({
         {message.content}
       </p>
 
-      <div className="flex items-center justify-between mt-2">
-        <div className="flex gap-2 flex-wrap">
+      <div className="flex items-center justify-between mt-2 gap-2">
+        <div className="flex gap-1.5 flex-wrap flex-1">
           {reactions.map(r => {
             const count = message[`reaction_${r}` as keyof Message] as number
             const myReactions = message.reacted_sessions?.[sessionId] ?? []
@@ -104,15 +156,16 @@ export function MessageBubble({
             return (
               <span
                 key={r}
-                className="text-xs"
-                style={{ color: active ? 'var(--accent)' : 'var(--text-secondary)' }}
+                className="reaction-pill"
+                style={active ? { borderColor: 'var(--accent)', color: 'var(--accent)' } : {}}
               >
-                {REACTION_EMOJIS[r as ReactionType]}{count}
+                {REACTION_EMOJIS[r as ReactionType]}
+                <span style={{ fontSize: 11, fontWeight: 600 }}>{count}</span>
               </span>
             )
           })}
         </div>
-        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-xs flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
           {timeAgo(message.created_at)}
         </span>
       </div>

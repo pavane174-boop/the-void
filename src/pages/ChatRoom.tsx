@@ -13,7 +13,7 @@ import { GhostDots } from '../components/GhostDots'
 import { StatsBar } from '../components/StatsBar'
 import { MessageBubble } from '../components/MessageBubble'
 import { MessageInput } from '../components/MessageInput'
-import { ReactionPicker } from '../components/ReactionPicker'
+import { MessageContextMenu } from '../components/MessageContextMenu'
 import { RareReactionToast } from '../components/RareReactionToast'
 import { TypingIndicator } from '../components/TypingIndicator'
 import { PollCreator } from '../components/PollCreator'
@@ -42,8 +42,7 @@ export function ChatRoom() {
   const [replyTo, setReplyTo] = useState<Message | null>(null)
   const [confessionMode, setConfessionMode] = useState(false)
   const [selfDestructMinutes, setSelfDestructMinutes] = useState<number | null>(null)
-  const [pickerMessage, setPickerMessage] = useState<Message | null>(null)
-  const [showRare, setShowRare] = useState(false)
+  const [contextMessage, setContextMessage] = useState<Message | null>(null)
   const [rareToast, setRareToast] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [showPollCreator, setShowPollCreator] = useState(false)
@@ -59,16 +58,24 @@ export function ChatRoom() {
   // Calculate vibe from messages
   const vibe: VibeType = messages.length > 0 ? calculateVibe(messages) : 'chill'
 
-  const handleTapMessage = useCallback((msg: Message) => {
-    // 10% chance of rare reaction
-    const rare = Math.random() < 0.1
-    setShowRare(rare)
-    if (rare) setRareToast(true)
-    setPickerMessage(msg)
+  const handleLongPress = useCallback((msg: Message) => {
+    setContextMessage(msg)
+  }, [])
+
+  const handleCopyMessage = useCallback((msg: Message) => {
+    navigator.clipboard.writeText(msg.content).catch(() => {
+      const el = document.createElement('textarea')
+      el.value = msg.content
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    })
   }, [])
 
   const handleReact = useCallback(
     (msg: Message, reaction: ReactionType) => {
+      if (Math.random() < 0.1) setRareToast(true)
       reactToMessage(msg, reaction)
     },
     [reactToMessage]
@@ -222,7 +229,7 @@ export function ChatRoom() {
             >
               <MessageBubble
                 message={msg}
-                onTap={handleTapMessage}
+                onLongPress={handleLongPress}
                 onVote={(m, i) => votePoll(m, i)}
                 onAnswerBomb={(m, a) => answerBomb(m, a)}
                 onPin={pinMessage}
@@ -252,12 +259,13 @@ export function ChatRoom() {
         />
       </div>
 
-      {/* ── REACTION PICKER ── */}
-      <ReactionPicker
-        message={pickerMessage}
+      {/* ── MESSAGE CONTEXT MENU ── */}
+      <MessageContextMenu
+        message={contextMessage}
         onReact={handleReact}
-        onClose={() => setPickerMessage(null)}
-        showRare={showRare}
+        onCopy={handleCopyMessage}
+        onReply={(msg) => { setReplyTo(msg); setContextMessage(null) }}
+        onClose={() => setContextMessage(null)}
         sessionId={sessionId}
       />
 
