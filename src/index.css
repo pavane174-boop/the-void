@@ -204,6 +204,15 @@ input, textarea, select {
 .orb-glow { animation: orb-glow 2.5s ease-in-out infinite; }
 
 /* ──────────────────────────────────────────
+   MESSAGE BUBBLE — no text selection
+────────────────────────────────────────── */
+.msg-bubble, .msg-bubble * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* ──────────────────────────────────────────
    MESSAGE ENTER
 ────────────────────────────────────────── */
 @keyframes slideInUp {

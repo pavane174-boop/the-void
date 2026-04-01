@@ -44,8 +44,9 @@ export function MessageBubble({
     }
   }
 
-  const longPressProps = {
-    onTouchStart: startPress,
+  // For messages with no interactive children, preventDefault stops text selection.
+  // For polls/bombs that have tap buttons inside, we skip preventDefault.
+  const longPressPropsBase = {
     onTouchEnd: cancelPress,
     onTouchMove: cancelPress,
     onMouseDown: startPress,
@@ -55,7 +56,22 @@ export function MessageBubble({
       e.preventDefault()
       onLongPress(message)
     },
-    style: { userSelect: 'none' as const },
+  }
+
+  const longPressProps = {
+    ...longPressPropsBase,
+    className: 'msg-bubble',
+    onTouchStart: (e: React.TouchEvent) => {
+      e.preventDefault()
+      startPress()
+    },
+  }
+
+  // For bubbles with interactive children (poll buttons etc.), don't preventDefault
+  const longPressPropsInteractive = {
+    ...longPressPropsBase,
+    className: 'msg-bubble',
+    onTouchStart: startPress,
   }
 
   const { message_type } = message
@@ -70,7 +86,7 @@ export function MessageBubble({
 
   if (message_type === 'poll') {
     return (
-      <div {...longPressProps}>
+      <div {...longPressPropsInteractive}>
         <PollBubble
           message={message}
           onVote={i => onVote(message, i)}
@@ -83,7 +99,7 @@ export function MessageBubble({
 
   if (message_type === 'ticking_bomb') {
     return (
-      <div {...longPressProps}>
+      <div {...longPressPropsInteractive}>
         <TickingBombBubble
           message={message}
           onAnswer={a => onAnswerBomb(message, a)}
@@ -129,11 +145,8 @@ export function MessageBubble({
   return (
     <div
       {...longPressProps}
-      className={`message-enter rounded-bubble p-3 mx-3 mb-2 ${isFame ? 'fame-card' : ''}`}
-      style={{
-        ...(isFame ? {} : { backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }),
-        userSelect: 'none',
-      }}
+      className={`msg-bubble message-enter rounded-bubble p-3 mx-3 mb-2 ${isFame ? 'fame-card' : ''}`}
+      style={isFame ? {} : { backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}
     >
       {isFame && (
         <div className="flex items-center gap-1.5 mb-2">

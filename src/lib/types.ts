@@ -63,11 +63,11 @@ export type VibeType = 'chaotic' | 'chill' | 'wild' | 'deep' | 'unhinged' | 'mel
 export type ReactionType = 'fire' | 'skull' | 'eyes' | 'heart' | 'diamond'
 
 export const REACTION_EMOJIS: Record<ReactionType, string> = {
-  fire: '🔥',
-  skull: '💀',
-  eyes: '👀',
   heart: '❤️',
-  diamond: '💎',
+  fire: '👍',
+  skull: '😂',
+  eyes: '😮',
+  diamond: '🙏',
 }
 
-export const REACTION_KEYS: ReactionType[] = ['fire', 'skull', 'eyes', 'heart', 'diamond']
+export const REACTION_KEYS: ReactionType[] = ['heart', 'fire', 'skull', 'eyes', 'diamond']
