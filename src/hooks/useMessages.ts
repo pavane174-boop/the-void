@@ -127,7 +127,13 @@ export function useMessages(room: Room | null) {
         payload.bomb_answers = []
       }
 
-      await supabase.from('messages').insert(payload)
+      const { data: inserted } = await supabase.from('messages').insert(payload).select().single()
+      if (inserted) {
+        setMessages(prev =>
+          prev.some(m => m.id === inserted.id) ? prev : [...prev, inserted as Message]
+        )
+        scheduleSelfDestruct(inserted as Message)
+      }
       await updateStreak(room)
 
       // Update daily stats
@@ -152,7 +158,7 @@ export function useMessages(room: Room | null) {
           )
       }
     },
-    [room, sessionId]
+    [room, sessionId, scheduleSelfDestruct]
   )
 
   const reactToMessage = useCallback(
@@ -179,13 +185,16 @@ export function useMessages(room: Room | null) {
         Object.values(updatedReactedSessions).reduce((sum, arr) => sum + arr.length, 0) -
         Object.values(message.reacted_sessions ?? {}).reduce((sum, arr) => sum + (arr as string[]).length, 0)
 
+      const optimisticUpdate = {
+        [`reaction_${reaction}`]: newCount,
+        reacted_sessions: updatedReactedSessions,
+        total_reactions: Math.max(0, message.total_reactions + totalDelta),
+      }
+      setMessages(prev => prev.map(m => m.id === message.id ? { ...m, ...optimisticUpdate } : m))
+
       await supabase
         .from('messages')
-        .update({
-          [`reaction_${reaction}`]: newCount,
-          reacted_sessions: updatedReactedSessions,
-          total_reactions: Math.max(0, message.total_reactions + totalDelta),
-        })
+        .update(optimisticUpdate)
         .eq('id', message.id)
     },
     [sessionId]
@@ -196,6 +205,7 @@ export function useMessages(room: Room | null) {
       const votes = { ...(message.poll_votes ?? {}) }
       if (votes[sessionId] !== undefined) return // already voted
       votes[sessionId] = String(optionIndex)
+      setMessages(prev => prev.map(m => m.id === message.id ? { ...m, poll_votes: votes } : m))
       await supabase.from('messages').update({ poll_votes: votes }).eq('id', message.id)
     },
     [sessionId]
