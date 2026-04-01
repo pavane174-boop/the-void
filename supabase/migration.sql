@@ -72,6 +72,11 @@ ALTER PUBLICATION supabase_realtime ADD TABLE messages;
 ALTER PUBLICATION supabase_realtime ADD TABLE room_members;
 ALTER PUBLICATION supabase_realtime ADD TABLE rooms;
 
+-- Required for filtered postgres_changes (UPDATE/DELETE events with room_id filter)
+ALTER TABLE messages REPLICA IDENTITY FULL;
+ALTER TABLE room_members REPLICA IDENTITY FULL;
+ALTER TABLE rooms REPLICA IDENTITY FULL;
+
 -- ROW LEVEL SECURITY (open for anonymous app)
 ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
