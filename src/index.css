@@ -1,0 +1,347 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────────
+   DARK THEME (default)
+────────────────────────────────────────── */
+:root {
+  --bg-primary: #0d0d0d;
+  --bg-surface: #161616;
+  --bg-surface-hover: #1e1e1e;
+  --bg-stats: #111111;
+  --border: #252525;
+  --text-primary: #ffffff;
+  --text-secondary: #999999;
+  --text-muted: #555555;
+  --text-hint: #333333;
+  --accent: #00e676;
+  --accent-hover: #00c853;
+  --streak: #ff9100;
+  --vibe-chaotic: #ff5252;
+  --vibe-chill: #00e676;
+  --vibe-wild: #ff9100;
+  --vibe-deep: #a855f7;
+  --vibe-unhinged: #ff3d71;
+  --vibe-melancholy: #60a5fa;
+  --confession-bg: linear-gradient(135deg, #14101e, #100c18);
+  --confession-border: #2a1e40;
+  --confession-text: #c4b0e0;
+  --confession-label: #a855f7;
+  --confession-shadow: 0 0 12px rgba(168, 85, 247, 0.1);
+  --fame-border: rgba(255, 61, 113, 0.3);
+  --fame-shadow: 0 0 10px rgba(255, 61, 113, 0.12);
+  --fame-label: #ff3d71;
+  --fame-bg: transparent;
+  --bomb-bg: linear-gradient(135deg, #1a1a1a, #111);
+  --bomb-border: #252525;
+  --rare: #ffaa00;
+  --poll-fill: #00e676;
+  --poll-empty: #222222;
+}
+
+/* ──────────────────────────────────────────
+   LIGHT THEME
+────────────────────────────────────────── */
+html.light {
+  --bg-primary: #ffffff;
+  --bg-surface: #f7f7f7;
+  --bg-surface-hover: #f0f0f0;
+  --bg-stats: #fafafa;
+  --border: #eeeeee;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #999999;
+  --text-hint: #cccccc;
+  --accent: #0d9e6c;
+  --accent-hover: #0a8a5c;
+  --streak: #e67e00;
+  --vibe-chaotic: #e04040;
+  --vibe-chill: #0d9e6c;
+  --vibe-wild: #e67e00;
+  --vibe-deep: #7c3aed;
+  --vibe-unhinged: #e04040;
+  --vibe-melancholy: #3b82f6;
+  --confession-bg: #f8f4fc;
+  --confession-border: #e8d8f4;
+  --confession-text: #4a3570;
+  --confession-label: #7c3aed;
+  --confession-shadow: none;
+  --fame-border: #ffdddd;
+  --fame-shadow: 0 0 10px rgba(224, 64, 64, 0.05);
+  --fame-label: #e04040;
+  --fame-bg: #fff5f5;
+  --bomb-bg: #f0faf4;
+  --bomb-border: #d0eadc;
+  --rare: #b8860b;
+  --poll-fill: #0d9e6c;
+  --poll-empty: #e0e0e0;
+}
+
+/* ──────────────────────────────────────────
+   BASE STYLES
+────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 14px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 200ms ease, color 200ms ease;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ──────────────────────────────────────────
+   SCROLLBARS
+────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ──────────────────────────────────────────
+   INPUT RESET (prevent iOS zoom on focus)
+────────────────────────────────────────── */
+input, textarea, select {
+  font-size: 16px !important;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ──────────────────────────────────────────
+   FONT UTILITIES
+────────────────────────────────────────── */
+.font-grotesk { font-family: 'Space Grotesk', system-ui, sans-serif; }
+
+/* ──────────────────────────────────────────
+   CONFESSION CARD
+────────────────────────────────────────── */
+.confession-card {
+  background: var(--confession-bg);
+  border: 1px solid var(--confession-border);
+  box-shadow: var(--confession-shadow);
+  color: var(--confession-text);
+}
+
+/* ──────────────────────────────────────────
+   FAME CARD
+────────────────────────────────────────── */
+.fame-card {
+  background: var(--fame-bg);
+  border: 1px solid var(--fame-border);
+  box-shadow: var(--fame-shadow);
+}
+
+/* ──────────────────────────────────────────
+   BOMB CARD
+────────────────────────────────────────── */
+.bomb-card {
+  background: var(--bomb-bg);
+  border: 1px solid var(--bomb-border);
+}
+
+/* ──────────────────────────────────────────
+   REACTION PILL
+────────────────────────────────────────── */
+.reaction-pill {
+  background-color: var(--bg-surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  user-select: none;
+}
+.reaction-pill:active { transform: scale(0.93); }
+.reaction-pill.active { border-color: var(--accent); color: var(--accent); }
+
+/* ──────────────────────────────────────────
+   POLL BARS
+────────────────────────────────────────── */
+.poll-bar-bg { background-color: var(--poll-empty); }
+.poll-bar-fill { background-color: var(--poll-fill); transition: width 400ms ease; }
+
+/* ──────────────────────────────────────────
+   GHOST PULSE
+────────────────────────────────────────── */
+@keyframes ghost-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(1.2); }
+}
+.ghost-pulse { animation: ghost-pulse 2.4s ease-in-out infinite; }
+
+/* ──────────────────────────────────────────
+   ORB GLOW (landing page)
+────────────────────────────────────────── */
+@keyframes orb-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,230,118,0.5), 0 0 0 0 rgba(0,230,118,0.25); }
+  50%       { box-shadow: 0 0 0 12px rgba(0,230,118,0.15), 0 0 0 24px rgba(0,230,118,0.06); }
+}
+.orb-glow { animation: orb-glow 2.5s ease-in-out infinite; }
+
+/* ──────────────────────────────────────────
+   MESSAGE ENTER
+────────────────────────────────────────── */
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.message-enter { animation: slideInUp 0.3s ease forwards; }
+
+/* ──────────────────────────────────────────
+   SELF-DESTRUCT EXIT
+────────────────────────────────────────── */
+@keyframes fadeOutShrink {
+  from { opacity: 1; max-height: 300px; }
+  to   { opacity: 0; max-height: 0; padding: 0; margin: 0; }
+}
+.message-exit { animation: fadeOutShrink 0.5s ease forwards; overflow: hidden; }
+
+/* ──────────────────────────────────────────
+   TOAST
+────────────────────────────────────────── */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-enter { animation: toastIn 0.25s ease forwards; }
+
+/* ──────────────────────────────────────────
+   SHAKE (error)
+────────────────────────────────────────── */
+@keyframes shakeX {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.shake { animation: shakeX 0.4s ease; }
+
+/* ──────────────────────────────────────────
+   PIN CODE BOXES
+────────────────────────────────────────── */
+.pin-box {
+  width: 60px;
+  height: 64px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background-color: var(--bg-surface);
+  text-align: center;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  caret-color: var(--accent);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  outline: none;
+}
+.pin-box:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,230,118,0.15);
+}
+html.light .pin-box:focus {
+  box-shadow: 0 0 0 3px rgba(13,158,108,0.15);
+}
+.pin-box.error {
+  border-color: #ff5252;
+  box-shadow: 0 0 0 3px rgba(255,82,82,0.15);
+}
+
+/* ──────────────────────────────────────────
+   TOGGLE SWITCH
+────────────────────────────────────────── */
+.toggle-switch { position: relative; width: 42px; height: 24px; display: inline-block; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background-color: var(--border);
+  border-radius: 10px;
+  transition: background-color 200ms ease;
+  cursor: pointer;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 200ms ease;
+}
+.toggle-switch input:checked + .toggle-slider { background-color: var(--accent); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+/* ──────────────────────────────────────────
+   ACTIVE STATES
+────────────────────────────────────────── */
+button:active { opacity: 0.82; }
+
+/* ──────────────────────────────────────────
+   VIBE COLORS
+────────────────────────────────────────── */
+.vibe-chaotic   { color: var(--vibe-chaotic); }
+.vibe-chill     { color: var(--vibe-chill); }
+.vibe-wild      { color: var(--vibe-wild); }
+.vibe-deep      { color: var(--vibe-deep); }
+.vibe-unhinged  { color: var(--vibe-unhinged); }
+.vibe-melancholy{ color: var(--vibe-melancholy); }
+
+/* ──────────────────────────────────────────
+   MODAL OVERLAY
+────────────────────────────────────────── */
+.modal-overlay {
+  background-color: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+}
+
+/* ──────────────────────────────────────────
+   DESKTOP PHONE SHELL
+────────────────────────────────────────── */
+.app-bg { background-color: var(--bg-stats); }
+
+.phone-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+@media (min-width: 1024px) {
+  .phone-container {
+    width: 480px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+}
+
+/* scroll momentum on iOS */
+.scroll-ios {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
